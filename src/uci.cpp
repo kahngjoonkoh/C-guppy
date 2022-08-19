@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 
             if (go_params.front() == "infinite") {
                 std::thread th1(halt, std::ref(guppy), std::ref(cmdStack));
-                guppy.setLimits(false, 0, false, 0, false, 0);
+                guppy.setLimits(false, 0, false, 0, false, 0, false);
                 guppy.think();
                 th1.join();
 
@@ -183,6 +183,7 @@ int main(int argc, char *argv[]) {
             } else {
                 bool limit_time=false, limit_depth=false, limit_nodes=false, movestogo_given=false, movetime_given=false;
                 int wtime=0, btime=0, winc=0, binc=0, movestogo=0, movetime=0, depth=0, nodes=0, time_control=0;
+                bool timeAfter = true;
                 vector<std::string>::iterator it;
 
                 int i = 0;
@@ -214,16 +215,21 @@ int main(int argc, char *argv[]) {
                         movetime = std::stoi(go_params[i+1]);
                     }
                 }
-                if (movetime_given) {
-                    guppy.setLimits(true, movetime, limit_depth, depth, limit_nodes, nodes);
-                } else if (movestogo_given) {
+                if (timeAfter) {
+                    time_control = (guppy.getTurn() == libchess::Side::White) ? (wtime/50 + winc/2) : (btime/50 + binc/2);
+                    guppy.setLimits(limit_time, time_control, limit_depth, depth, limit_nodes, nodes, true);
+                }
+                 else if (movestogo_given) {
                     time_control = (guppy.getTurn() == libchess::Side::White) ? (wtime/(movestogo + 1) + winc) : (btime/(movestogo + 1) + binc);
-                    guppy.setLimits(limit_time, time_control, limit_depth, depth, limit_nodes, nodes);
+                    guppy.setLimits(limit_time, time_control, limit_depth, depth, limit_nodes, nodes, false);
+
+                } else if (movetime_given) {
+                    guppy.setLimits(true, movetime, limit_depth, depth, limit_nodes, nodes, false);
                 } else {
                     // 40 for human, 60 for engines.
                     int av_ply = 50;
                     time_control = (guppy.getTurn() == libchess::Side::White) ? (wtime/(av_ply-guppy.w_moves + 1) + winc) : (btime/(av_ply-guppy.b_moves + 1) + binc);
-                    guppy.setLimits(limit_time, time_control, limit_depth, depth, limit_nodes, nodes);
+                    guppy.setLimits(limit_time, time_control, limit_depth, depth, limit_nodes, nodes, false);
                 }
                 std::thread th2(halt, std::ref(guppy), std::ref(cmdStack));
                 guppy.think();

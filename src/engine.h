@@ -45,7 +45,7 @@ public:
 
     int w_moves, b_moves;
     void setPosition(std::string, vector<std::string>);
-    void setLimits(bool, int, bool, int, bool, int);
+    void setLimits(bool, int, bool, int, bool, int, bool);
 
     void think();
     int MTDF(bool, int16_t, uint8_t);
@@ -54,6 +54,8 @@ public:
     int evaluateBoard();
 
     bool haltFlag;
+    bool waitTimeAfter;
+    bool timePassedFlag;
 
     Side getTurn();
 

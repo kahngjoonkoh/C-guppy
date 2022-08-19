@@ -29,7 +29,7 @@ void Engine::setPosition(std::string fen, vector<std::string> moves) {
     board = pos;
 }
 
-void Engine::setLimits(bool tb, int t, bool db, int d, bool nb, int n) {
+void Engine::setLimits(bool tb, int t, bool db, int d, bool nb, int n, bool timeAfter) {
     time_limit_present = tb;
     depth_limit_present = db;
     node_limit_present = nb;
@@ -37,7 +37,8 @@ void Engine::setLimits(bool tb, int t, bool db, int d, bool nb, int n) {
     t_limit = t;
     d_limit = d;
     n_limit = n;
-
+    waitTimeAfter = timeAfter;
+    timePassedFlag = false;
 }
 
 void Engine::think() {
@@ -58,6 +59,11 @@ void Engine::think() {
             break;
         }
 
+        if (waitTimeAfter && timePassedFlag) {
+            haltFlag = true;
+            break;
+        }
+
 
         if (depth_limit_present && (depth > d_limit)) {
             haltFlag = true;
@@ -71,8 +77,8 @@ void Engine::think() {
         else
             break;
         // score to engine perspective.
-//        int score = (board.turn() == libchess::Side::White) ? fg : -fg;
-        int score = fg;
+        int score = (board.turn() == libchess::Side::White) ? fg : -fg;
+//        int score = fg;
         auto end = chrono::steady_clock::now();
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(end - start_t).count();
         int nps = (elapsed == 0) ? 0 : (float) nodes/ (float) elapsed * 1000;
@@ -110,14 +116,23 @@ int Engine::alphaBetaWithMemory(bool root, int16_t alpha, int16_t beta, int8_t d
     // checkup every 1024 nodes
     if ((nodes & 1023) == 0) {
         if (time_limit_present) {
-            auto end = chrono::steady_clock::now();
-            auto elapsed = chrono::duration_cast<chrono::milliseconds>(end - start_t).count();
-            if (elapsed > t_limit) {
-                haltFlag = true;
-                return 0;
+            if (!timePassedFlag) {
+                auto end = chrono::steady_clock::now();
+                auto elapsed = chrono::duration_cast<chrono::milliseconds>(end - start_t).count();
+                if (elapsed > t_limit) {
+                    if (waitTimeAfter) {
+                        timePassedFlag = true;
+                        haltFlag = true;
+                        return 0;
+                    } else {
+                        timePassedFlag = true;
+                    }
+                }
             }
+
         }
     }
+
     if (node_limit_present && (nodes >= n_limit)) {
         haltFlag = true;
         return 0;
@@ -158,12 +173,16 @@ int Engine::alphaBetaWithMemory(bool root, int16_t alpha, int16_t beta, int8_t d
             return evaluateBoard();
         } else
             i++;
-
+//            return qSearch(bool root, int16_t alpha, int16_t beta, int8_t depth, bool quiet, bool maximise, uint8_t i);
     }
-
+//
 //    vector<Move> legals;
 //    if (depth == 0) {
-//        legals = board.legal_captures();
+//        auto A = board.legal_captures();
+//        auto B = board.check_evasions();
+//        legals.reserve( A.size() + B.size() ); // preallocate memory
+//        legals.insert( legals.end(), A.begin(), A.end() );
+//        legals.insert( legals.end(), B.begin(), B.end() );
 //    } else {
 //        legals = board.legal_moves();
 //    }
