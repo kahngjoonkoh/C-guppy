@@ -191,10 +191,9 @@ int Position::pesto_eval() noexcept {
     eg[Side::White] = 0;
     eg[Side::Black] = 0;
 
-    std::string fen;
     for (int y = 7; y>=0; y--){
         for (int x = 0; x < 8; ++x) {
-            int i = x*8 + (7-y);
+            int i = (7-y)*8 + x;
             const auto sq = Square(x, y);
             const auto bb = Bitboard{sq};
             const auto piece = piece_on(sq);
@@ -209,7 +208,7 @@ int Position::pesto_eval() noexcept {
             }
         }
     }
-    Side turn2play = turn();
+    Side turn2play = Side::White;
 
     /* tapered eval */
     int mgScore = mg[turn2play] - mg[!turn2play];

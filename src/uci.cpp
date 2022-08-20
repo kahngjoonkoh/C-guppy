@@ -183,7 +183,9 @@ int main(int argc, char *argv[]) {
             } else {
                 bool limit_time=false, limit_depth=false, limit_nodes=false, movestogo_given=false, movetime_given=false;
                 int wtime=0, btime=0, winc=0, binc=0, movestogo=0, movetime=0, depth=0, nodes=0, time_control=0;
-                bool timeAfter = true;
+
+                // change this to alter time behavior.
+                bool timeAfter = false;
                 vector<std::string>::iterator it;
 
                 int i = 0;

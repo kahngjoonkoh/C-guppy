@@ -122,10 +122,10 @@ int Engine::alphaBetaWithMemory(bool root, int16_t alpha, int16_t beta, int8_t d
                 if (elapsed > t_limit) {
                     if (waitTimeAfter) {
                         timePassedFlag = true;
-                        haltFlag = true;
-                        return 0;
                     } else {
                         timePassedFlag = true;
+                        haltFlag = true;
+                        return 0;
                     }
                 }
             }
