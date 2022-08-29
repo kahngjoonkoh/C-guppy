@@ -1,0 +1,6 @@
+.gitattributes
+bin
+obj
+*.depend
+*.layout
+*.txt
